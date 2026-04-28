@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pinnacle Point Calculator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { border-radius: 20px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .header-box { background: linear-gradient(135deg, #00b900 0%, #009900 100%); color: white; border-radius: 15px 15px 0 0; padding: 20px; }
+        .result-box { background-color: #ffffff; border: 2px solid #e9ecef; border-radius: 12px; padding: 15px; margin-bottom: 10px; transition: 0.3s; }
+        .result-box:hover { border-color: #00b900; background-color: #fafffa; }
+        .points { font-size: 1.5rem; font-weight: bold; color: #00b900; }
+        .btn-line { background-color: #00b900; color: white; font-weight: bold; border-radius: 10px; padding: 15px; border: none; width: 100%; transition: 0.3s; }
+        .btn-line:hover { background-color: #009900; transform: translateY(-2px); }
+        .label-text { color: #6c757d; font-size: 0.9rem; }
+    </style>
+</head>
+<body class="p-3">
+
+    <div class="container" style="max-width: 500px;">
+        <div class="card">
+            <div class="header-box text-center">
+                <h2 class="m-0">Pinnacle CRM</h2>
+                <small>Resort Point Calculator</small>
+            </div>
+            
+            <div class="card-body p-4">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">ยอดเงินจ่ายจริง (บาท)</label>
+                    <input type="number" id="amount" class="form-control form-control-lg text-center" placeholder="0.00" oninput="calc()">
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">ประเภทการจอง</label>
+                    <select id="bookingType" class="form-select form-select-lg" onchange="calc()">
+                        <option value="1">Direct Booking (จองตรง 100%)</option>
+                        <option value="0.5">OTA / Agoda (ได้แต้ม 50%)</option>
+                    </select>
+                </div>
+
+                <div class="label-text mb-2 text-uppercase fw-bold">คะแนนที่ลูกค้าจะได้รับ:</div>
+                
+                <div class="result-box d-flex justify-content-between align-items: center;">
+                    <span>Silver <small>(200=1)</small></span>
+                    <span id="resS" class="points">0</span>
+                </div>
+
+                <div class="result-box d-flex justify-content-between align-items: center; border-width: 3px;">
+                    <span class="fw-bold">Gold <small>(180=1)</small></span>
+                    <span id="resG" class="points">0</span>
+                </div>
+
+                <div class="result-box d-flex justify-content-between align-items: center;">
+                    <span>Pinnacle <small>(150=1)</small></span>
+                    <span id="resP" class="points">0</span>
+                </div>
+
+                <div class="mt-4">
+                    <button onclick="copyAndOpen()" class="btn-line">
+                        คัดลอกคะแนน & เปิดหน้าออกพอยท์
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script>
+        // เริ่มต้นระบบ LIFF (2009927519-aAoLoyCz)
+        async function main() {
+            await liff.init({ liffId: "YOUR_LIFF_ID_HERE" }); 
+        }
+        main();
+
+        function calc() {
+            const amt = document.getElementById('amount').value || 0;
+            const factor = document.getElementById('bookingType').value;
+
+            // คำนวณแต่ละระดับ (ปัดเศษลง)
+            const sPoints = Math.floor((amt / 200) * factor);
+            const gPoints = Math.floor((amt / 180) * factor);
+            const pPoints = Math.floor((amt / 150) * factor);
+
+            document.getElementById('resS').innerText = sPoints;
+            document.getElementById('resG').innerText = gPoints;
+            document.getElementById('resP').innerText = pPoints;
+        }
+
+        function copyAndOpen() {
+            // ดึงคะแนนช่อง Gold มาเป็นค่าหลัก (ปรับเปลี่ยนได้)
+            const score = document.getElementById('resG').innerText;
+            
+            // ก๊อปปี้ลงคลิปบอร์ด
+            navigator.clipboard.writeText(score).then(() => {
+                alert("ก๊อปปี้คะแนน " + score + " แต้มแล้ว! พนักงานสามารถกดวางในหน้าถัดไปได้เลย");
+                
+                // เปิดหน้าออกพอยท์ของ LINE OA Plus (เปิดหน้าต่างใหม่)
+                const lineUrl = "https://oaplus.line.biz/channels/5000096716/my-crm/points/add-point";
+                liff.openWindow({
+                    url: lineUrl,
+                    external: true
+                });
+            });
+        }
+    </script>
+</body>
+</html>
